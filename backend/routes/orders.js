@@ -50,7 +50,7 @@ router.get('/:orderId', (req, res) => {
         on: 'u.id = o.user_id'
       }
     ])
-    .withFields(['o.id', 'p.title as name', 'p.description', 'p.price', 'u.username'])
+    .withFields(['o.id', 'p.title as name', 'p.description', 'p.price', 'u.username', 'p.image', 'od.quantity as quantityOrdered'])
     .filter({ 'o.id': orderId })
     .getAll()
     .then(orders => {
@@ -74,9 +74,9 @@ router.post('/new', (req, res) => {
       if (newOrderId.insertId > 0) {
 
         products.forEach(async (p) => {
-          let data = await database.table('products').filter({ id: p.id }).withFields(['quantity']).get();
+          let data = await database.table('products').filter({ id: p.id }).withFields(['quantity', 'image']).get();
 
-          let inCart = p.inCart;
+          let inCart = p.incart;
 
           if (data.quantity > 0) {
             data.quantity = data.quantity - inCart;
@@ -92,7 +92,7 @@ router.post('/new', (req, res) => {
             .insert({
               order_id: newOrderId.insertId,
               product_id: p.id,
-              quantity: p.inCart
+              quantity: inCart
             }).then(newId => {
               database.table('products')
                 .filter({ id: p.id })
@@ -110,7 +110,7 @@ router.post('/new', (req, res) => {
       res.json({
         message: `Order successfully placed with order id ${newOrderId.insertId}`,
         success: true,
-        order_id: newOrderId,
+        order_id: newOrderId.insertId,
         products: products
       });
 

@@ -12,14 +12,14 @@ export class OrderService {
 
   getSingleOrder(orderId: number) {
     return this.http
-      .get<ProductResponseModel[]>(this.SERVER_URL + 'orders/' + orderId)
+      .get<ProductResponseModel[]>(this.SERVER_URL + '/orders/' + orderId)
       .toPromise();
   }
 }
 
 interface ProductResponseModel {
   id: number;
-  title: string;
+  name: string;
   description: string;
   price: number;
   quantityOrdered: number;

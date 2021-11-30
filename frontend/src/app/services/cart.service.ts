@@ -188,11 +188,14 @@ export class CartService {
       localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
       this.cartData$.next({ ...this.cartDataServer });
     } else {
-      data.numInCart--;
-      if (data.numInCart < 1) {
-        //TODO delete the product from cart
-        this.cartData$.next({ ...this.cartDataServer });
+      if (data.numInCart - 1 < 1) {
+        let delResponse = this.deleteProductFromCart(index);
+        if (delResponse) {
+          data.numInCart--;
+          this.cartData$.next({ ...this.cartDataServer });
+        }
       } else {
+        data.numInCart--;
         this.cartData$.next({ ...this.cartDataServer });
         this.cartDataClient.prodData[index].incart = data.numInCart;
         this.calculateTotal();
@@ -202,7 +205,7 @@ export class CartService {
     }
   }
 
-  deleteProductFromCart(index: number) {
+  deleteProductFromCart(index: number): boolean {
     if (window.confirm('Are you sure you want to remove the item?')) {
       this.cartDataServer.data.splice(index, 1);
       this.cartDataClient.prodData.splice(index, 1);
@@ -238,8 +241,10 @@ export class CartService {
       } else {
         this.cartData$.next({ ...this.cartDataServer });
       }
+
+      return true;
     } else {
-      return;
+      return false;
     }
   }
 
@@ -293,6 +298,7 @@ export class CartService {
                         'cart',
                         JSON.stringify(this.cartDataClient)
                       );
+                      this.cartData$.next({ ...this.cartDataServer });
                     });
                 }
               });
